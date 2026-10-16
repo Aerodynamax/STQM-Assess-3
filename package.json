@@ -1,0 +1,17 @@
+{
+    "dependencies": {
+        "testcafe": "^3.7.6"
+    },
+    "name": "Assessment 3",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "devDependencies": {},
+    "scripts": {
+        "test:example": "testcafe chrome tests/example.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "type": "commonjs"
+}
