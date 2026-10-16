@@ -59,41 +59,36 @@ test("Items per page", async (t) => {
 
 // must create the selector in a function or it won't update when the page changes
 function getCurrentPageNavBtn() {
+    return Selector("ul.pagination > li.active > span");
+
+    // no idea why this is inconsistent :/
     // return Selector("ul")
     //     .withAttribute("class", "pagination")
     //     .child("li")
     //     .withAttribute("class", "active")
     //     .child("span");
-    return Selector("ul.pagination > li.active > span");
 }
 
 test("Pagination", async (t) => {
-    // get all the page links
-    let pageLinks = Selector("ul.pagination a.page-link");
-    // .withAttribute("class", "pagination")
-    // .find("a.page-link");
+    // get all the page links (that are numbers, not the "jump to" ones)
+    let pageLinks = Selector("ul.pagination a.page-link").withText(/(\d+)/);
 
     // pick random page
     let pageIdx = parseInt(Math.random() * (await pageLinks.count)); // this is the index, not the page #
 
     let page = pageLinks.nth(pageIdx);
+
     // get the actual page number (as a string)
     let pageNo = await page.innerText;
 
-    await t.report("pageNo: " + pageNo);
-
+    // get the initial products
     let initialProducts = getProductListElems();
-    let initialProductCount = initialProducts.count;
 
     await t
         // switch pages
         .click(page)
-        // check if page number updated
         .scrollIntoView(getCurrentPageNavBtn())
-        // .wait(500)
-        // .debug()
         // make sure we went to the right page
-        .report(getCurrentPageNavBtn(), await getCurrentPageNavBtn().innerText)
         .expect(getCurrentPageNavBtn().withText(pageNo).exists)
         .ok()
         // make sure the items are different
