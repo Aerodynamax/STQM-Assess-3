@@ -1,6 +1,6 @@
 import { Selector, test } from "testcafe";
 
-fixture("Browsing products").page(
+fixture("T001 - Browsing products").page(
     "https://ecommerce-playground.lambdatest.io/index.php?route=product/search&search=",
 );
 
