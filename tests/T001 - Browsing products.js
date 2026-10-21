@@ -24,14 +24,14 @@ test("Grid & list view", async (t) => {
     let gridButton = Selector("button").withAttribute("id", "grid-view");
 
     await t
-        // check if list view renders
+        // check if all items are in list view form
         .click(listButton)
-        .expect(getProductListElems().classNames)
-        .contains("product-list")
-        // check if grid view renders
+        .expect(getProductListElems().filter(".product-list").count)
+        .eql(await getProductListElems().count)
+        // check if all items are in grid view form
         .click(gridButton)
-        .expect(getProductListElems().classNames)
-        .contains("product-grid");
+        .expect(getProductListElems().filter(".product-grid").count)
+        .eql(await getProductListElems().count);
 });
 
 test("Items per page", async (t) => {
@@ -59,32 +59,35 @@ test("Items per page", async (t) => {
 
 // must create the selector in a function or it won't update when the page changes
 function getCurrentPageNavBtn() {
-    return Selector("ul.pagination > li.active > span");
-
-    // no idea why this is inconsistent :/
-    // return Selector("ul")
-    //     .withAttribute("class", "pagination")
-    //     .child("li")
-    //     .withAttribute("class", "active")
-    //     .child("span");
+    // return Selector("ul.pagination > li.active > span");
+    return (
+        Selector("ul.pagination")
+            // .withAttribute("class", "pagination")
+            .child("li.active")
+            // .withAttribute("class", "active")
+            .child("span")
+    );
 }
 
 test("Pagination", async (t) => {
     // get all the page links (that are numbers, not the "jump to" ones)
-    let pageLinks = Selector("ul.pagination a.page-link").withText(/(\d+)/);
+    const pageLinks = await Selector("ul.pagination a.page-link").withText(
+        /(\d+)/, // only digits [https://stackoverflow.com/a/19715367]
+    );
 
     // pick random page
-    let pageIdx = parseInt(Math.random() * (await pageLinks.count)); // this is the index, not the page #
+    const pageIdx = parseInt(Math.random() * (await pageLinks.count)); // this is the index, not the page #
 
-    let page = pageLinks.nth(pageIdx);
+    const page = pageLinks.nth(pageIdx);
 
     // get the actual page number (as a string)
-    let pageNo = await page.innerText;
+    const pageNo = await page.innerText;
 
     // get the initial products
-    let initialProducts = getProductListElems();
+    const initialProducts = await getProductListElems();
 
     await t
+        .scrollIntoView(getCurrentPageNavBtn())
         // switch pages
         .click(page)
         .scrollIntoView(getCurrentPageNavBtn())
@@ -92,6 +95,6 @@ test("Pagination", async (t) => {
         .expect(getCurrentPageNavBtn().withText(pageNo).exists)
         .ok()
         // make sure the items are different
-        .expect(getProductListElems())
+        .expect(await getProductListElems())
         .notContains(initialProducts);
 });
