@@ -70,6 +70,22 @@ test("Search by brand", async (t) => {
     await t.expect(Selector("a").withText(brand).exists).ok();
 });
 
-// test("Search by description", async (t) => {
-//     await t.click();
-// });
+test("Search by description", async (t) => {
+    const desc = "3.5mm stereo headset jack";
+
+    // TODO: replace this with the regluar site when it is back
+    const descriptionToggle = Selector("input").withAttribute(
+        "type",
+        "checkbox",
+    );
+
+    await t
+        // search for the description & click the button
+        .typeText(getBodySearchInput(), desc)
+        .click(descriptionToggle)
+        .click(getBodySearchInput())
+        .pressKey("enter");
+
+    // check if brand name is correct
+    await t.expect(Selector("a").withText(desc).exists).notOk();
+});
