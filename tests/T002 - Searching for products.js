@@ -1,17 +1,23 @@
 import { Selector, test } from "testcafe";
 
 fixture("T002 - Searching for products").page(
-    "https://ecommerce-playground.lambdatest.io/index.php?route=product%2Fsearch&search=",
+    "https://opencart.abstracta.us/index.php?route=product/search",
+    // "https://ecommerce-playground.lambdatest.io/index.php?route=product/search&search=",
 );
 
 // returns the element that has all the products inside it
+// function getProductList() {
+//     return Selector("div")
+//         .withAttribute(
+//             "data-grid",
+//             "product-layout product-grid no-desc col-xl-4 col-lg-4 col-md-4 col-sm-6 col-6",
+//         )
+//         .withAttribute("data-view_id", "grid");
+// }
+
+// TODO: remove override because site is down
 function getProductList() {
-    return Selector("div")
-        .withAttribute(
-            "data-grid",
-            "product-layout product-grid no-desc col-xl-4 col-lg-4 col-md-4 col-sm-6 col-6",
-        )
-        .withAttribute("data-view_id", "grid");
+    return Selector("#content .row:nth-of-type(3)");
 }
 
 // returns the elements in the product list
@@ -40,9 +46,29 @@ test("Search by name", async (t) => {
         .eql(await getProductListElems().count);
 });
 
-// test("Search by brand", async (t) => {
-//     await t.click();
-// });
+// function getBodySearchBarHolder() {
+//     return Selector("#input-search").filterVisible();
+// }
+function getBodySearchInput() {
+    return Selector(`input`)
+        .withAttribute("placeholder", "Keywords")
+        .withAttribute("name", "search");
+}
+
+test("Search by brand", async (t) => {
+    const brand = "Apple";
+
+    await t
+        // search for the brand
+        .typeText(getBodySearchInput(), brand)
+        .pressKey("enter");
+
+    // click on the site
+    await t.click(getProductListElems().find("a"));
+
+    // check if brand name is correct
+    await t.expect(Selector("a").withText(brand).exists).ok();
+});
 
 // test("Search by description", async (t) => {
 //     await t.click();
