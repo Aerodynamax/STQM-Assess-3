@@ -1,17 +1,13 @@
 import { Selector, test } from "testcafe";
 
 fixture("T001 - Browsing products").page(
-    "https://ecommerce-playground.lambdatest.io/index.php?route=product/search&search=",
+    "https://opencart.abstracta.us/index.php?route=product/search&search=",
 );
 
 // returns the element that has all the products inside it
 function getProductList() {
-    return Selector("div")
-        .withAttribute(
-            "data-grid",
-            "product-layout product-grid no-desc col-xl-4 col-lg-4 col-md-4 col-sm-6 col-6",
-        )
-        .withAttribute("data-view_id", "grid");
+    // get the 3rd item with the "row" class inside the item with id "content"
+    return Selector("#content .row:nth-of-type(3)");
 }
 
 // returns the elements in the product list
@@ -36,42 +32,45 @@ test("Grid & list view", async (t) => {
 
 test("Items per page", async (t) => {
     // get the # of items to show <select> elem
-    let showPerPageSelectElem = Selector("span")
-        .withAttribute("class", "input-group-text")
-        .withText("Show:")
-        .parent()
-        .nextSibling("select");
+    let showPerPageSelectElem = Selector("select")
+        // same as: "select#input-limit"
+        .withAttribute("id", "input-limit");
+
+    let itemsOnPageDisplayElem = await Selector("div")
+        .withAttribute("class", "row")
+        .child(".text-right")
+        .withText("Showing")
+        .filterVisible();
+
+    // get the store item count (19) from the string "Showing 1 to 15 of 19 (2 Pages)"
+    let maxItems = parseInt(
+        (await itemsOnPageDisplayElem.innerText).split(" of ")[1].split(" ")[0],
+    );
 
     await t
         // set count to 15
         .click(showPerPageSelectElem)
         .click(showPerPageSelectElem.child("option").withText("15"))
-        // check if count is actually 15
+        // check if count is actually 15 (or if the store doesn't have enough)
         .expect(getProductListElems().count)
-        .eql(15)
+        .eql(Math.min(15, maxItems))
         // set count to 50
         .click(showPerPageSelectElem)
         .click(showPerPageSelectElem.child("option").withText("50"))
-        // check if it's actually 50
+        // check if it's actually 50 (or if the store doesn't have enough)
         .expect(getProductListElems().count)
-        .eql(50);
+        .eql(Math.min(50, maxItems));
 });
 
 // must create the selector in a function or it won't update when the page changes
 function getCurrentPageNavBtn() {
     // return Selector("ul.pagination > li.active > span");
-    return (
-        Selector("ul.pagination")
-            // .withAttribute("class", "pagination")
-            .child("li.active")
-            // .withAttribute("class", "active")
-            .child("span")
-    );
+    return Selector("ul.pagination").child("li.active").child("span");
 }
 
 test("Pagination", async (t) => {
     // get all the page links (that are numbers, not the "jump to" ones)
-    const pageLinks = await Selector("ul.pagination a.page-link").withText(
+    const pageLinks = await Selector("ul.pagination").find("a").withText(
         /(\d+)/, // only digits [https://stackoverflow.com/a/19715367]
     );
 
@@ -83,18 +82,22 @@ test("Pagination", async (t) => {
     // get the actual page number (as a string)
     const pageNo = await page.innerText;
 
-    // get the initial products
-    const initialProducts = await getProductListElems();
+    // get the initial product grid text (product name/description/price)
+    const initialProducts = await getProductList().textContent;
 
     await t
         .scrollIntoView(getCurrentPageNavBtn())
         // switch pages
-        .click(page)
+        .click(page);
+
+    // split cuz switching pages
+
+    await t
         .scrollIntoView(getCurrentPageNavBtn())
         // make sure we went to the right page
         .expect(getCurrentPageNavBtn().withText(pageNo).exists)
         .ok()
-        // make sure the items are different
-        .expect(await getProductListElems())
-        .notContains(initialProducts);
+        // make sure the products are different
+        .expect(getProductList().textContent)
+        .notEql(initialProducts);
 });

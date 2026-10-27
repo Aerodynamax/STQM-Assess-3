@@ -1,22 +1,12 @@
 import { Selector, test } from "testcafe";
 
 fixture("T002 - Searching for products").page(
-    "https://opencart.abstracta.us/index.php?route=product/search",
-    // "https://ecommerce-playground.lambdatest.io/index.php?route=product/search&search=",
+    "https://opencart.abstracta.us/index.php?route=product/search&search=",
 );
 
 // returns the element that has all the products inside it
-// function getProductList() {
-//     return Selector("div")
-//         .withAttribute(
-//             "data-grid",
-//             "product-layout product-grid no-desc col-xl-4 col-lg-4 col-md-4 col-sm-6 col-6",
-//         )
-//         .withAttribute("data-view_id", "grid");
-// }
-
-// TODO: remove override because site is down
 function getProductList() {
+    // get the 3rd item with the "row" class inside the item with id "content"
     return Selector("#content .row:nth-of-type(3)");
 }
 
@@ -30,25 +20,20 @@ test("Search by name", async (t) => {
 
     const searchHolder = Selector("#search").filterVisible();
     const searchInputBox = searchHolder.find(`input[name="search"]`);
+    // find the button with the font-awesome search icon elem
+    const searchButton = searchHolder.find("i").parent();
 
-    await t
-        // .debug()
-        // .click(searchInputBox)
-        .typeText(searchInputBox, searchString)
-        .click(searchHolder.find(`button[type="submit"]`));
+    // enter the query
+    await t.typeText(searchInputBox, searchString).click(searchButton);
+
+    // split up because page refreshes can have weird results (i dunno i just work here :/)
 
     // check if all search results contain the word
-    // i don't know why, but splitting these up makes the .eql() get the actual product list instead of the original one
     await t
-        .expect(
-            getProductListElems().find(`h4.title`).withText(searchString).count,
-        )
+        .expect(getProductListElems().withText(searchString).count)
         .eql(await getProductListElems().count);
 });
 
-// function getBodySearchBarHolder() {
-//     return Selector("#input-search").filterVisible();
-// }
 function getBodySearchInput() {
     return Selector(`input`)
         .withAttribute("placeholder", "Keywords")
@@ -56,14 +41,21 @@ function getBodySearchInput() {
 }
 
 test("Search by brand", async (t) => {
-    const brand = "Apple";
+    const brand = "Hewlett-Packard";
 
     await t
         // search for the brand
         .typeText(getBodySearchInput(), brand)
         .pressKey("enter");
 
-    // click on the site
+    // confirm any products exist (they should)
+    await t
+        .expect(getProductListElems().exists)
+        .ok(
+            "No products show up for HP even though they are sold on the platform.",
+        );
+
+    // click on the first product
     await t.click(getProductListElems().find("a"));
 
     // check if brand name is correct
@@ -74,10 +66,9 @@ test("Search by description", async (t) => {
     const desc = "3.5mm stereo headset jack";
 
     // TODO: replace this with the regluar site when it is back
-    const descriptionToggle = Selector("input").withAttribute(
-        "type",
-        "checkbox",
-    );
+    const descriptionToggle = Selector("input")
+        .withAttribute("type", "checkbox")
+        .withAttribute("name", "description");
 
     await t
         // search for the description & click the button
@@ -86,6 +77,11 @@ test("Search by description", async (t) => {
         .click(getBodySearchInput())
         .pressKey("enter");
 
-    // check if brand name is correct
-    await t.expect(Selector("a").withText(desc).exists).notOk();
+    // click on the first product
+    await t.click(getProductListElems().find("a"));
+
+    const description = Selector("div").withAttribute("id", "tab-description");
+
+    // check if description is in description
+    await t.expect(description.find("*").withText(desc).exists).ok();
 });
