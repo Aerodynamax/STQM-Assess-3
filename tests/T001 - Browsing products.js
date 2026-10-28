@@ -1,7 +1,7 @@
 import { Selector, test } from "testcafe";
 
 fixture("T001 - Browsing products").page(
-    "https://opencart.abstracta.us/index.php?route=product/search&search=",
+    "https://opencart.abstracta.us/index.php?route=product/search&search",
 );
 
 // returns the element that has all the products inside it
@@ -20,6 +20,7 @@ test("Grid & list view", async (t) => {
     let gridButton = Selector("button").withAttribute("id", "grid-view");
 
     await t
+        .scrollIntoView(getProductList())
         // check if all items are in list view form
         .click(listButton)
         .expect(getProductListElems().filter(".product-list").count)
@@ -51,12 +52,14 @@ test("Items per page", async (t) => {
         // set count to 15
         .click(showPerPageSelectElem)
         .click(showPerPageSelectElem.child("option").withText("15"))
+        .scrollIntoView(getProductList())
         // check if count is actually 15 (or if the store doesn't have enough)
         .expect(getProductListElems().count)
         .eql(Math.min(15, maxItems))
         // set count to 50
         .click(showPerPageSelectElem)
         .click(showPerPageSelectElem.child("option").withText("50"))
+        .scrollIntoView(getProductList())
         // check if it's actually 50 (or if the store doesn't have enough)
         .expect(getProductListElems().count)
         .eql(Math.min(50, maxItems));
@@ -98,6 +101,7 @@ test("Pagination", async (t) => {
         .expect(getCurrentPageNavBtn().withText(pageNo).exists)
         .ok()
         // make sure the products are different
+        .scrollIntoView(getProductList())
         .expect(getProductList().textContent)
         .notEql(initialProducts);
 });

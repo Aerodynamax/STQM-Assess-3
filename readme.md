@@ -2,6 +2,10 @@
 
 A repo to hold Group 13's Systems Testing and Quality Management Assessment 3 test code.
 
+> [!NOTE]
+> FOR MARKER:
+> use `npm test` to run the full test suite.
+
 # Setup
 
 ## 1. Install vscode & get extensions

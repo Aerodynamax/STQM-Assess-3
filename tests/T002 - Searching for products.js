@@ -1,13 +1,13 @@
 import { Selector, test } from "testcafe";
 
 fixture("T002 - Searching for products").page(
-    "https://opencart.abstracta.us/index.php?route=product/search&search=",
+    "https://opencart.abstracta.us/index.php?route=product/search&search",
 );
 
 // returns the element that has all the products inside it
 function getProductList() {
-    // get the 3rd item with the "row" class inside the item with id "content"
-    return Selector("#content .row:nth-of-type(3)");
+    // get the "row" with the products inside the main page section
+    return Selector("#content .row:has(>.product-layout)");
 }
 
 // returns the elements in the product list
@@ -30,6 +30,7 @@ test("Search by name", async (t) => {
 
     // check if all search results contain the word
     await t
+        .scrollIntoView(getProductList())
         .expect(getProductListElems().withText(searchString).count)
         .eql(await getProductListElems().count);
 });
@@ -48,12 +49,41 @@ test("Search by brand", async (t) => {
         .typeText(getBodySearchInput(), brand)
         .pressKey("enter");
 
-    // confirm any products exist (they should)
+    // store the results for checking later
+    const searchResults = (await getProductList().exists)
+        ? await getProductList().innerText
+        : "";
+
+    // go to the brand page
+    await t.navigateTo(
+        "https://opencart.abstracta.us/index.php?route=product/manufacturer/info&manufacturer_id=7",
+    );
+    // dynamic way
+    // const brandsLink = Selector("a").withExactText("Brands");
+
+    // await t.click(brandsLink);
+
+    // const brandPageLink = Selector("a").withExactText(brand);
+
+    // await t.click(brandPageLink);
+
+    // check if test is valid
     await t
         .expect(getProductListElems().exists)
         .ok(
-            "No products show up for HP even though they are sold on the platform.",
+            "Hewlett-Packard has no listed products.  This test must be revised",
         );
+
+    // confirm the products match
+    await t
+        .scrollIntoView(getProductList())
+        .expect(getProductList().innerText)
+        .eql(
+            searchResults,
+            "Hewlett-Packard product listing mismatch in search & brand pages",
+        );
+
+    // confirm the brand name is correct for first product (just in case)
 
     // click on the first product
     await t.click(getProductListElems().find("a"));
@@ -65,16 +95,14 @@ test("Search by brand", async (t) => {
 test("Search by description", async (t) => {
     const desc = "3.5mm stereo headset jack";
 
-    // TODO: replace this with the regluar site when it is back
     const descriptionToggle = Selector("input")
         .withAttribute("type", "checkbox")
         .withAttribute("name", "description");
 
     await t
         // search for the description & click the button
-        .typeText(getBodySearchInput(), desc)
         .click(descriptionToggle)
-        .click(getBodySearchInput())
+        .typeText(getBodySearchInput(), desc)
         .pressKey("enter");
 
     // click on the first product
@@ -83,5 +111,8 @@ test("Search by description", async (t) => {
     const description = Selector("div").withAttribute("id", "tab-description");
 
     // check if description is in description
-    await t.expect(description.find("*").withText(desc).exists).ok();
+    await t
+        .scrollIntoView(description)
+        .expect(description.find("*").withText(desc).exists)
+        .ok();
 });

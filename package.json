@@ -8,7 +8,10 @@
     "main": "index.js",
     "devDependencies": {},
     "scripts": {
-        "test:example": "testcafe chrome tests/example.js"
+        "test:example": "testcafe chrome tests/example.js",
+        "test": "npx testcafe chrome tests --fixture-grep \"T[0-9]+\"",
+        "test:T001": "testcafe chrome tests/T001 - Browsing products.js",
+        "test:T002": "testcafe chrome tests/T002 - Searching for products.js"
     },
     "keywords": [],
     "author": "",
