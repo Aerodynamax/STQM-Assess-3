@@ -29,14 +29,17 @@ const loginBeforeFunc = async (t) => {
     const loginBtn = Selector(`input[type="submit"]`);
 
     await t
-        .typeText(emailField, "xirive4433@ofags.com")
+        .typeText(emailField, "wishlist-test@email.com")
         .typeText(passwordField, "Password")
         .click(loginBtn);
 
     // verify login was successful
     await t
         .expect(getURL())
-        .notEql("https://opencart.abstracta.us/index.php?route=account/login");
+        .notEql(
+            "https://opencart.abstracta.us/index.php?route=account/login",
+            "Couldn't access wishlist test account",
+        );
 };
 const logoutAfterFunc = async (t) => {
     // logout
