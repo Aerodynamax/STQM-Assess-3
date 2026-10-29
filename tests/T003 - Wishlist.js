@@ -57,7 +57,7 @@ test("Wishlist without account", async (t) => {
         // check if failure popup shows
         .expect(
             confirmationPopup.withText(
-                " You must login or create an account to save Palm Treo Pro to your wish list!",
+                "You must login or create an account to save Palm Treo Pro to your wish list!",
             ).exists,
         )
         .ok();
@@ -163,6 +163,13 @@ test("Wishlist add to cart", async (t) => {
         // check if still in wishlist
         .expect(productRows.innerText)
         .contains(productName);
+
+    // (cleanup) remove from cart
+    const removeFromCartBtn = getCartListElems()
+        .withText(productName)
+        .find(`button[title="Remove"]`);
+
+    await t.click(removeFromCartBtn);
 })
     .skipJsErrors() // page errors occasionally get hit yet do not impact the page or test (error: "ReferenceError: pagespeed is not defined")
     .before(loginBeforeFunc)
