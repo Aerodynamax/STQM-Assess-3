@@ -4,21 +4,12 @@ import { Selector } from 'testcafe';
 // Product: HTC Touch HD
 
 fixture`T004 - Product Page`
-    .page`https://opencart.abstracta.us/`;
+    .page`https://opencart.abstracta.us/index.php?route=product/product&product_id=28`;
 
 // Scenario 1: Verify the correct product information is displayed.
 test('Scenario 1 - Verify product information', async t => {
     const productName = Selector('#content h1');
     const productDetails = Selector('#content');
-
-    // Navigate to the HTC Touch HD product page.
-    await t.typeText(Selector('input[name="search"]'), 'HTC Touch HD');
-
-    // Submit the product search.
-    await t.click(Selector('#search button'));
-
-    // Open HTC Touch HD from the search results.
-    await t.click(Selector('#content .product-thumb h4 a').withText('HTC Touch HD'));
 
     // Verify the product name.
     await t.expect(productName.innerText).eql('HTC Touch HD');
@@ -28,7 +19,6 @@ test('Scenario 1 - Verify product information', async t => {
 
     // Verify product availability information is displayed.
     await t.expect(productDetails.innerText).contains('Availability:');
-
 });
 
 
@@ -38,9 +28,6 @@ test('Scenario 2 - Verify product description tab', async t => {
     const descriptionTab = Selector('a[href="#tab-description"]');
     const descriptionContent = Selector('#tab-description');
     const reviewContent = Selector('#tab-review');
-
-    // Open the HTC Touch HD product page.
-    await t.navigateTo('https://opencart.abstracta.us/index.php?route=product/product&product_id=28');
 
     // Switch to the Reviews tab.
     await t.click(reviewsTab);
@@ -69,9 +56,6 @@ test('Scenario 3 - Verify product image gallery', async t => {
     const imageCounter = Selector('.mfp-counter');
     const leftArrow = Selector('.mfp-arrow-left');
     const rightArrow = Selector('.mfp-arrow-right');
-
-    // Open the HTC Touch HD product page.
-    await t.navigateTo('https://opencart.abstracta.us/index.php?route=product/product&product_id=28');
 
     // Click the second product image thumbnail (side view).
     await t.click(secondThumbnail);
