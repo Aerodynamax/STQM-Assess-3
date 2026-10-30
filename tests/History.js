@@ -67,6 +67,50 @@ test("Scenario 3 - Inspect order information", async (t) => {
     await t
         .expect(Selector("#content td").withText("Order Details").exists)
         .ok();
+
+    const productRow = Selector("#content table tbody tr")
+        .filter((node) => node.querySelector('a[href*="route=account/order/reorder"]') !== null);
+
+    const reorderLink = productRow.find(
+        'a[href*="route=account/order/reorder"]'
+    );
+    const returnLink = productRow.find(
+    'a[href*="route=account/return/add"]'
+    );
+
+    await t.expect(reorderLink.exists).ok();
+
+    const reorderUrl = await reorderLink.getAttribute("href");
+
+    await t.expect(reorderUrl)
+        .contains("route=account/order/reorder");
+
+    await t.expect(reorderUrl)
+        .contains(`order_id=${orderId}`);
+
+    const orderProductId = new URL(
+        reorderUrl,
+        "https://opencart.abstracta.us"
+    ).searchParams.get("order_product_id");
+
+    await t.expect(orderProductId).notEql(null);
+
+    await t.expect(returnLink.exists).ok();
+
+    const returnUrl = await returnLink.getAttribute("href");
+
+    await t.expect(returnUrl)
+        .contains("route=account/return/add");
+
+    await t.expect(returnUrl)
+        .contains(`order_id=${orderId}`);
+
+    const productId = new URL(
+        returnUrl,
+        "https://opencart.abstracta.us"
+    ).searchParams.get("product_id");
+
+    await t.expect(productId).notEql(null);
 });
 
 test("Scenario 4 - Purchase History requires login", async (t) => {
