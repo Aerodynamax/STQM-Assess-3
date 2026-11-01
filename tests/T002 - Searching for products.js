@@ -58,14 +58,6 @@ test("Search by brand", async (t) => {
     await t.navigateTo(
         "https://opencart.abstracta.us/index.php?route=product/manufacturer/info&manufacturer_id=7",
     );
-    // dynamic way
-    // const brandsLink = Selector("a").withExactText("Brands");
-
-    // await t.click(brandsLink);
-
-    // const brandPageLink = Selector("a").withExactText(brand);
-
-    // await t.click(brandPageLink);
 
     // check if test is valid
     await t

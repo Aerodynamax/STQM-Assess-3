@@ -77,12 +77,9 @@ test("Pagination", async (t) => {
         /(\d+)/, // only digits [https://stackoverflow.com/a/19715367]
     );
 
-    // pick random page
-    const pageIdx = parseInt(Math.random() * (await pageLinks.count)); // this is the index, not the page #
-
+    // pick random page then get it's link and number (as a string)
+    const pageIdx = parseInt(Math.random() * (await pageLinks.count));
     const page = pageLinks.nth(pageIdx);
-
-    // get the actual page number (as a string)
     const pageNo = await page.innerText;
 
     // get the initial product grid text (product name/description/price)

@@ -1,6 +1,9 @@
 # node
 node_modules
 
+# test sceenshots
+screenshots
+
 # MacOS stuff
 *DS_Store*
 *__MACOSX*
