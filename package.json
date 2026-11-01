@@ -8,10 +8,7 @@
     "main": "index.js",
     "devDependencies": {},
     "scripts": {
-        "test:example": "testcafe chrome tests/example.js",
-        "test": "npx testcafe chrome tests --fixture-grep \"T[0-9]+\"",
-        "test:T001": "testcafe chrome tests/T001 - Browsing products.js",
-        "test:T002": "testcafe chrome tests/T002 - Searching for products.js"
+        "test": "npx testcafe chrome 'tests/Login.js' 'tests/T002 - Searching for products.js' 'tests/T001 - Browsing products.js' 'tests/T006 - Contact Us Form.js' 'tests/Login.js' 'tests/T004 - Product Page.js' 'tests/T003 - Wishlist.js' 'tests/T005 - Review Product.js' 'tests/T008 - Compare Products.js' 'tests/T007 - Adding to Cart.js' 'tests/History.js' 'tests/T009 - Shopping Cart Management.js'"
     },
     "keywords": [],
     "author": "",
